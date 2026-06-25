@@ -1,0 +1,94 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_USER   = 'kuunyangna'
+        BACKEND_IMAGE    = "${DOCKERHUB_USER}/school-app-backend"
+        FRONTEND_IMAGE   = "${DOCKERHUB_USER}/school-app-frontend"
+        IMAGE_TAG        = "${BUILD_NUMBER}"
+        KIND_CONTEXT     = "kind-aquila"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/kuunyangna/Local-Jenkins-k8-Deployment.git'
+            }
+        }
+
+        stage('Build Backend Image') {
+            steps {
+                dir('backend') {
+                    sh "docker build -t ${BACKEND_IMAGE}:${IMAGE_TAG} -t ${BACKEND_IMAGE}:latest ."
+                }
+            }
+        }
+
+        stage('Build Frontend Image') {
+            steps {
+                dir('frontend') {
+                    sh "docker build -t ${FRONTEND_IMAGE}:${IMAGE_TAG} -t ${FRONTEND_IMAGE}:latest ."
+                }
+            }
+        }
+
+        stage('Push Images to DockerHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'docker-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
+                        docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
+                        docker push ${BACKEND_IMAGE}:latest
+                        docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
+                        docker push ${FRONTEND_IMAGE}:latest
+                        docker logout
+                    """
+                }
+            }
+        }
+
+        stage('Load Images into kind') {
+            steps {
+                sh """
+                    kind load docker-image ${BACKEND_IMAGE}:${IMAGE_TAG} --name aquila
+                    kind load docker-image ${FRONTEND_IMAGE}:${IMAGE_TAG} --name aquila
+                """
+            }
+        }
+
+        stage('Phase 1: Deploy Backend') {
+            steps {
+                sh """
+                    kubectl config use-context ${KIND_CONTEXT}
+                    kubectl apply -f backend/
+                    kubectl set image deployment/backend backend=${BACKEND_IMAGE}:${IMAGE_TAG} --record || true
+                    kubectl rollout status deployment/backend --timeout=120s
+                """
+            }
+        }
+
+        stage('Phase 2: Deploy Frontend') {
+            steps {
+                sh """
+                    kubectl config use-context ${KIND_CONTEXT}
+                    kubectl apply -f frontend/
+                    kubectl set image deployment/frontend frontend=${FRONTEND_IMAGE}:${IMAGE_TAG} --record || true
+                    kubectl rollout status deployment/frontend --timeout=120s
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Backend and frontend deployed to kind cluster 'aquila'."
+        }
+        failure {
+            echo "Pipeline failed — check stage logs above."
+        }
+        always {
+            sh 'docker logout || true'
+        }
+    }
+}
