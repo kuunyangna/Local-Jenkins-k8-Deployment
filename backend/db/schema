@@ -1,0 +1,47 @@
+-- School Management App - PostgreSQL schema
+-- Run this against the database you create, e.g.:
+--   psql -h <host> -U school_user -d school_db -f schema.sql
+-- The backend also auto-creates these tables on startup (idempotent),
+-- so running this manually is optional but useful for seeding.
+
+CREATE TABLE IF NOT EXISTS teachers (
+    id            SERIAL PRIMARY KEY,
+    first_name    VARCHAR(80)  NOT NULL,
+    last_name     VARCHAR(80)  NOT NULL,
+    email         VARCHAR(150) UNIQUE NOT NULL,
+    subject       VARCHAR(100),
+    phone         VARCHAR(30),
+    created_at    TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS classes (
+    id            SERIAL PRIMARY KEY,
+    name          VARCHAR(100) NOT NULL,
+    grade_level   VARCHAR(30),
+    room          VARCHAR(30),
+    teacher_id    INTEGER REFERENCES teachers(id) ON DELETE SET NULL,
+    created_at    TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS students (
+    id            SERIAL PRIMARY KEY,
+    first_name    VARCHAR(80)  NOT NULL,
+    last_name     VARCHAR(80)  NOT NULL,
+    email         VARCHAR(150) UNIQUE NOT NULL,
+    date_of_birth DATE,
+    guardian_name VARCHAR(150),
+    guardian_phone VARCHAR(30),
+    created_at    TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS enrollments (
+    id            SERIAL PRIMARY KEY,
+    student_id    INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    class_id      INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+    enrolled_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE (student_id, class_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_enrollments_student ON enrollments(student_id);
+CREATE INDEX IF NOT EXISTS idx_enrollments_class   ON enrollments(class_id);
+CREATE INDEX IF NOT EXISTS idx_classes_teacher      ON classes(teacher_id);
