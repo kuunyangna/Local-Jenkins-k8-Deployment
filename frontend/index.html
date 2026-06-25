@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ledger — School Management</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div class="app-shell">
+
+    <!-- Signature element: a ledger-tab sidebar, like folder tabs in a school register -->
+    <aside class="tabs-rail" aria-label="Sections">
+      <div class="rail-brand">
+        <span class="rail-mark">§</span>
+        <span class="rail-title">Ledger</span>
+      </div>
+      <nav class="rail-tabs" id="nav-tabs">
+        <button class="rail-tab is-active" data-view="dashboard">Dashboard</button>
+        <button class="rail-tab" data-view="students">Students</button>
+        <button class="rail-tab" data-view="teachers">Teachers</button>
+        <button class="rail-tab" data-view="classes">Classes</button>
+        <button class="rail-tab" data-view="enrollments">Enrollments</button>
+      </nav>
+      <div class="rail-foot">
+        <span class="status-dot" id="api-status-dot"></span>
+        <span id="api-status-text">checking API…</span>
+      </div>
+    </aside>
+
+    <main class="content">
+
+      <header class="content-header">
+        <h1 id="view-title">Dashboard</h1>
+        <p id="view-subtitle" class="muted">An overview of the current term.</p>
+      </header>
+
+      <div id="toast" class="toast" hidden></div>
+
+      <!-- DASHBOARD -->
+      <section class="view is-active" id="view-dashboard">
+        <div class="stat-row">
+          <div class="stat-card">
+            <span class="stat-figure" id="stat-students">—</span>
+            <span class="stat-label">Students enrolled</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-figure" id="stat-teachers">—</span>
+            <span class="stat-label">Teaching staff</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-figure" id="stat-classes">—</span>
+            <span class="stat-label">Classes running</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-figure" id="stat-enrollments">—</span>
+            <span class="stat-label">Active enrollments</span>
+          </div>
+        </div>
+        <div class="ledger-card">
+          <h2>Recent enrollments</h2>
+          <table class="ledger-table">
+            <thead>
+              <tr><th>Student</th><th>Class</th><th>Date</th></tr>
+            </thead>
+            <tbody id="dashboard-recent"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- STUDENTS -->
+      <section class="view" id="view-students">
+        <form class="entry-form" id="form-student">
+          <input type="hidden" name="id" />
+          <div class="form-grid">
+            <label>First name<input name="first_name" required /></label>
+            <label>Last name<input name="last_name" required /></label>
+            <label>Email<input name="email" type="email" required /></label>
+            <label>Date of birth<input name="date_of_birth" type="date" /></label>
+            <label>Guardian name<input name="guardian_name" /></label>
+            <label>Guardian phone<input name="guardian_phone" /></label>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Add student</button>
+            <button type="button" class="btn-ghost" data-cancel-edit hidden>Cancel edit</button>
+          </div>
+        </form>
+        <div class="ledger-card">
+          <table class="ledger-table">
+            <thead>
+              <tr><th>Name</th><th>Email</th><th>Guardian</th><th>Born</th><th></th></tr>
+            </thead>
+            <tbody id="students-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TEACHERS -->
+      <section class="view" id="view-teachers">
+        <form class="entry-form" id="form-teacher">
+          <input type="hidden" name="id" />
+          <div class="form-grid">
+            <label>First name<input name="first_name" required /></label>
+            <label>Last name<input name="last_name" required /></label>
+            <label>Email<input name="email" type="email" required /></label>
+            <label>Subject<input name="subject" /></label>
+            <label>Phone<input name="phone" /></label>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Add teacher</button>
+            <button type="button" class="btn-ghost" data-cancel-edit hidden>Cancel edit</button>
+          </div>
+        </form>
+        <div class="ledger-card">
+          <table class="ledger-table">
+            <thead>
+              <tr><th>Name</th><th>Subject</th><th>Email</th><th>Phone</th><th></th></tr>
+            </thead>
+            <tbody id="teachers-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- CLASSES -->
+      <section class="view" id="view-classes">
+        <form class="entry-form" id="form-class">
+          <input type="hidden" name="id" />
+          <div class="form-grid">
+            <label>Class name<input name="name" required /></label>
+            <label>Grade level<input name="grade_level" /></label>
+            <label>Room<input name="room" /></label>
+            <label>Teacher
+              <select name="teacher_id">
+                <option value="">— unassigned —</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Add class</button>
+            <button type="button" class="btn-ghost" data-cancel-edit hidden>Cancel edit</button>
+          </div>
+        </form>
+        <div class="ledger-card">
+          <table class="ledger-table">
+            <thead>
+              <tr><th>Class</th><th>Grade</th><th>Room</th><th>Teacher</th><th></th></tr>
+            </thead>
+            <tbody id="classes-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ENROLLMENTS -->
+      <section class="view" id="view-enrollments">
+        <form class="entry-form" id="form-enrollment">
+          <div class="form-grid">
+            <label>Student
+              <select name="student_id" required>
+                <option value="">Select a student…</option>
+              </select>
+            </label>
+            <label>Class
+              <select name="class_id" required>
+                <option value="">Select a class…</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Enroll student</button>
+          </div>
+        </form>
+        <div class="ledger-card">
+          <table class="ledger-table">
+            <thead>
+              <tr><th>Student</th><th>Class</th><th>Enrolled on</th><th></th></tr>
+            </thead>
+            <tbody id="enrollments-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
