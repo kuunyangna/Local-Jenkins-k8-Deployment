@@ -1,0 +1,272 @@
+:root{
+  --ink:        #1B2A4A;
+  --ink-soft:   #34456b;
+  --gold:       #C9A227;
+  --parchment:  #F7F4EC;
+  --paper:      #FFFDF8;
+  --rule:       #E3DCC9;
+  --slate:      #5C6B7A;
+  --danger:     #B23A3A;
+  --success:    #3F7D58;
+
+  --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+*{ box-sizing: border-box; }
+html,body{ margin:0; padding:0; }
+body{
+  font-family: var(--font-body);
+  background: var(--parchment);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-shell{
+  display:flex;
+  min-height:100vh;
+}
+
+/* ---- Signature: ledger tab rail ---- */
+.tabs-rail{
+  width: 220px;
+  flex: none;
+  background: var(--ink);
+  color: #EFE7D2;
+  display:flex;
+  flex-direction:column;
+  padding: 28px 0 18px;
+}
+.rail-brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding: 0 24px 24px;
+  font-family: var(--font-display);
+}
+.rail-mark{
+  font-size: 28px;
+  color: var(--gold);
+  line-height:1;
+}
+.rail-title{
+  font-size: 20px;
+  letter-spacing: 0.02em;
+}
+.rail-tabs{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  flex:1;
+}
+.rail-tab{
+  text-align:left;
+  background:transparent;
+  border:none;
+  color:#CBD3E1;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  padding: 12px 24px;
+  cursor:pointer;
+  border-left: 3px solid transparent;
+  position:relative;
+}
+.rail-tab:hover{
+  background: rgba(255,255,255,0.05);
+  color:#fff;
+}
+.rail-tab.is-active{
+  background: var(--parchment);
+  color: var(--ink);
+  border-left: 3px solid var(--gold);
+  font-weight:600;
+  border-radius: 0 10px 10px 0;
+  margin-right: -1px;
+}
+.rail-foot{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding: 16px 24px 0;
+  font-size: 12px;
+  color: #9AA6BB;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 12px;
+}
+.status-dot{
+  width:8px; height:8px; border-radius:50%;
+  background: var(--slate);
+  display:inline-block;
+}
+.status-dot.ok{ background: var(--success); }
+.status-dot.fail{ background: var(--danger); }
+
+/* ---- Main content ---- */
+.content{
+  flex:1;
+  padding: 36px 48px 60px;
+  max-width: 1100px;
+}
+.content-header h1{
+  font-family: var(--font-display);
+  font-size: 30px;
+  margin: 0 0 4px;
+}
+.muted{ color: var(--slate); margin:0 0 28px; }
+
+.view{ display:none; }
+.view.is-active{ display:block; }
+
+.toast{
+  margin-bottom: 18px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+  border: 1px solid var(--rule);
+}
+.toast.error{ border-color: var(--danger); color: var(--danger); }
+.toast.success{ border-color: var(--success); color: var(--success); }
+
+/* ---- Stat row (dashboard) ---- */
+.stat-row{
+  display:grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.stat-card{
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 18px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.stat-figure{
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--ink);
+}
+.stat-label{
+  font-size: 12.5px;
+  color: var(--slate);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ---- Ledger card / ruled table ---- */
+.ledger-card{
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 22px 24px 8px;
+}
+.ledger-card h2{
+  font-family: var(--font-display);
+  font-size: 18px;
+  margin: 0 0 14px;
+}
+.ledger-table{
+  width:100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.ledger-table th{
+  text-align:left;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--slate);
+  border-bottom: 2px solid var(--ink);
+  padding: 8px 10px;
+}
+.ledger-table td{
+  padding: 11px 10px;
+  border-bottom: 1px solid var(--rule);
+}
+.ledger-table tr:last-child td{ border-bottom:none; }
+.ledger-table tr:hover td{ background: #FBF8EF; }
+.row-actions{ display:flex; gap:10px; justify-content:flex-end; }
+.row-actions button{
+  border:none; background:none; cursor:pointer;
+  font-size: 12.5px; color: var(--ink-soft); text-decoration: underline;
+  padding:0;
+}
+.row-actions button.danger{ color: var(--danger); }
+.empty-row td{ color: var(--slate); font-style: italic; text-align:center; padding: 18px; }
+
+/* ---- Forms ---- */
+.entry-form{
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--gold);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.form-grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px 18px;
+}
+.form-grid label{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  font-size: 12.5px;
+  color: var(--slate);
+}
+.form-grid input, .form-grid select{
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 9px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--parchment);
+  color: var(--ink);
+}
+.form-grid input:focus, .form-grid select:focus{
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+.form-actions{
+  display:flex;
+  gap:10px;
+  margin-top: 16px;
+}
+.btn-primary{
+  background: var(--ink);
+  color: #fff;
+  border:none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor:pointer;
+}
+.btn-primary:hover{ background: var(--ink-soft); }
+.btn-ghost{
+  background:none;
+  border: 1px solid var(--rule);
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor:pointer;
+  color: var(--slate);
+}
+
+@media (max-width: 760px){
+  .app-shell{ flex-direction:column; }
+  .tabs-rail{ width:100%; flex-direction:row; align-items:center; padding: 14px; overflow-x:auto; }
+  .rail-brand{ padding: 0 12px 0 0; }
+  .rail-tabs{ flex-direction:row; }
+  .rail-tab.is-active{ border-radius: 8px; border-left:none; border-bottom: 3px solid var(--gold); }
+  .rail-foot{ display:none; }
+  .content{ padding: 24px; }
+  .stat-row{ grid-template-columns: repeat(2,1fr); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation: none !important; transition: none !important; }
+}
