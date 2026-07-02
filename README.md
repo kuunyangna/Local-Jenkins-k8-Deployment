@@ -1,8 +1,10 @@
-# School Management System — Local Kubernetes Deployment
+# School Management System — Local Kubernetes Deployment (Cloud Migration Planned)
 
-An end-to-end deployment pipeline for a school management system, running on a local `kind` Kubernetes cluster with automated builds via Jenkins.
+This project is a working end-to-end deployment pipeline for a school management system, currently built and run entirely on a **local `kind` Kubernetes cluster** with automated builds via Jenkins. It was deliberately built local-first — as a proof of concept to validate the full CI/CD → containerization → orchestration flow before committing to cloud infrastructure costs and complexity.
 
-**Stack:** React/Node frontend + backend API, PostgreSQL database, Nginx Ingress, Jenkins CI/CD, Docker Hub image registry, `kind` (Kubernetes in Docker).
+The architecture (Ingress → Services → Deployments, HPA, Secrets, a Jenkins-driven pipeline) is intentionally close to how this would run in a managed cloud environment, so the migration path is mostly a matter of swapping infrastructure providers rather than redesigning the system. See [Future improvements & cloud migration roadmap](#future-improvements--cloud-migration-roadmap) for what that migration is expected to involve.
+
+**Current stack:** React/Node frontend + backend API, PostgreSQL database, Nginx Ingress, Jenkins CI/CD, Docker Hub image registry, `kind` (Kubernetes in Docker) — all running locally on a single developer machine.
 
 ---
 
@@ -19,6 +21,7 @@ An end-to-end deployment pipeline for a school management system, running on a l
 - [CI/CD pipeline](#cicd-pipeline)
 - [Local setup](#local-setup)
 - [Known gaps / follow-ups](#known-gaps--follow-ups)
+- [Future improvements & cloud migration roadmap](#future-improvements--cloud-migration-roadmap)
 
 ---
 
@@ -271,3 +274,40 @@ kubectl apply -f k8-manifest/
 - [ ] Consider whether Postgres, its Service, the Secret, the HPA, and the Ingress should be folded into the Jenkins pipeline (with idempotent `kubectl apply`) so a fresh cluster doesn't need manual setup
 - [ ] Consider adding an HPA for `frontend` if traffic patterns warrant it
 - [x] ~~Add screenshots and wire them into the Screenshots section above~~ — done (images live at repo root)
+
+---
+
+## Future improvements & cloud migration roadmap
+
+This deployment currently runs entirely on a local machine (`kind` cluster, local Jenkins, local Docker Hub pushes). That was a deliberate choice to prove out the pipeline before spending on infrastructure — the plan is to migrate this to a cloud environment once the local version is stable. Rough migration path, in order:
+
+### 1. Managed Kubernetes
+Replace `kind` with a managed cluster — e.g. Amazon EKS, Google GKE, or Azure AKS. Existing Deployments, Services, HPA, and Ingress manifests should carry over with minimal changes; the main adjustments are the Ingress controller/load balancer setup and storage classes.
+
+### 2. Managed database
+Move Postgres off an in-cluster Deployment onto a managed service (Amazon RDS, Cloud SQL, or Azure Database for PostgreSQL). This removes the need to manage backups, patching, and storage durability by hand, and decouples the database's lifecycle from the cluster's.
+
+### 3. Container registry
+Consider moving from public Docker Hub to a private registry tied to the cloud provider (Amazon ECR, Google Artifact Registry, Azure Container Registry) for better access control and to keep build artifacts closer to the cluster.
+
+### 4. CI/CD
+Migrate Jenkins to either a managed CI/CD service (GitHub Actions, GitLab CI, AWS CodePipeline) or a cloud-hosted Jenkins instance, so pipeline runs aren't dependent on a local machine being on. Pipeline stages stay conceptually the same — build, push, deploy — just retargeted at cloud endpoints.
+
+### 5. Secrets management
+Replace the manually-applied `my-sec` Kubernetes Secret with a proper secrets manager — AWS Secrets Manager, Google Secret Manager, HashiCorp Vault, or Sealed Secrets if staying Kubernetes-native. This closes the current gap where credentials live in an uncommitted local YAML file.
+
+### 6. Networking & TLS
+Add a real domain name and TLS termination at the Ingress (e.g. via cert-manager + Let's Encrypt, or a cloud load balancer's managed certificates) instead of local port-forwarding.
+
+### 7. Observability
+Carry the existing Prometheus/Grafana stack into the cloud cluster, backed by persistent storage, and consider adding centralized log aggregation (e.g. Loki, CloudWatch Logs, or Cloud Logging) since local `kubectl logs` won't scale as a debugging strategy in a cloud environment.
+
+### 8. Environments
+Introduce separate `staging` and `production` namespaces or clusters, so changes can be validated before reaching real users — something a single local cluster doesn't need, but a cloud deployment should have from the start.
+
+### Other improvements independent of the cloud move
+- Automate the currently-manual resources (Postgres, Secret, HPA, Ingress) into the Jenkins pipeline itself, with idempotent `kubectl apply` steps
+- Add resource `requests`/`limits` to the `frontend` and `postgres` Deployments
+- Add an HPA for `frontend`
+- Add automated tests to the pipeline ahead of the build stages
+- Add a rollback strategy (e.g. `kubectl rollout undo`) as an explicit, documented pipeline step rather than a manual recovery action
