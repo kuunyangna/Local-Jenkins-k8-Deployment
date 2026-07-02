@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2026-06-26T01:38:17Z"
+  labels:
+    app: postgres
+  name: postgres
+  namespace: default
+  resourceVersion: "29016"
+  uid: 4914a96c-6452-4191-8ca3-b92474b670a2
+spec:
+  clusterIP: 10.96.179.50
+  clusterIPs:
+  - 10.96.179.50
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    app: postgres
+  sessionAffinity: None
+  type: ClusterIP
+ https://github.com/kuunyangna/Local-Jenkins-k8-Deployment/blob/main/README.mdstatus:
+  loadBalancer: {}
