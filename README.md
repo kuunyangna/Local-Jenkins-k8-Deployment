@@ -233,23 +233,31 @@ kubectl apply -f k8-manifest/
 
 ## Screenshots
 
-Add screenshots of the running system below — replace each placeholder path with the actual image once you've added it to the repo (e.g. under a `docs/images/` folder).
-
 ### Jenkins pipeline
 
-<!-- ![Jenkins pipeline run](docs/images/jenkins-pipeline.png) -->
+![Jenkins pipeline stage view](docs/images/jenkins_pipeline.png)
+
+*4-run pipeline history, full run time ~34s: Checkout → Build Backend Image → Build Frontend Image → Push Images to DockerHub → Load Images into kind → Phase 1: Deploy Backend → Phase 2: Deploy Frontend → Post Actions.*
 
 ### Grafana dashboards
 
-<!-- ![Grafana cluster overview](docs/images/grafana-cluster-overview.png) -->
-<!-- ![Grafana backend metrics](docs/images/grafana-backend-metrics.png) -->
+![Grafana node exporter dashboard - CPU, memory, network, disk](docs/images/grafana.png)
+
+*Node Exporter dashboard for the `aquila-cluster-control-plane` node, showing CPU/memory/disk gauges and 24-hour CPU, memory, network, and disk usage trends.*
 
 ### Application interface
 
-<!-- ![App - login/home screen](docs/images/app-home.png) -->
-<!-- ![App - student enrollment](docs/images/app-enrollment.png) -->
+![Ledger app - dashboard overview](docs/images/app-1.png)
 
-> To use these: create `docs/images/` in your repo, drop the PNGs in, then uncomment the lines above and point each path at the matching filename. GitHub renders them inline once merged.
+*Dashboard: current term overview — students enrolled, teaching staff, classes running, and active enrollments, plus a recent enrollments table.*
+
+![Ledger app - students page](docs/images/app-2.png)
+
+*Students page: add-student form and a roster table with name, email, guardian, and date of birth.*
+
+![Ledger app - enrollments page](docs/images/app-3.png)
+
+*Enrollments page: links a student to a class and lists current enrollments with dates.*
 
 ---
 
@@ -262,4 +270,4 @@ Add screenshots of the running system below — replace each placeholder path wi
 - [ ] Move `other files/DB-secret.yaml` out of Git and add it to `.gitignore` — it holds the actual `my-sec` credential values referenced by the `backend` and `postgres` Deployments
 - [ ] Consider whether Postgres, its Service, the Secret, the HPA, and the Ingress should be folded into the Jenkins pipeline (with idempotent `kubectl apply`) so a fresh cluster doesn't need manual setup
 - [ ] Consider adding an HPA for `frontend` if traffic patterns warrant it
-- [ ] Add screenshots to `docs/images/` and wire them into the Screenshots section above
+- [x] ~~Add screenshots to `docs/images/` and wire them into the Screenshots section above~~ — done
