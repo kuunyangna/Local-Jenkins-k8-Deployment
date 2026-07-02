@@ -6,7 +6,7 @@ pipeline {
         BACKEND_IMAGE    = "${DOCKERHUB_USER}/school-app-backend"
         FRONTEND_IMAGE   = "${DOCKERHUB_USER}/school-app-frontend"
         IMAGE_TAG        = "${BUILD_NUMBER}"
-        KIND_CONTEXT     = "kind-aquila"
+        KIND_CONTEXT     = "kind-aquila-cluster"
     }
 
     stages {
@@ -51,8 +51,8 @@ pipeline {
         stage('Load Images into kind') {
             steps {
                 sh """
-                    kind load docker-image ${BACKEND_IMAGE}:${IMAGE_TAG} --name aquila
-                    kind load docker-image ${FRONTEND_IMAGE}:${IMAGE_TAG} --name aquila
+                    kind load docker-image ${BACKEND_IMAGE}:${IMAGE_TAG} --name aquila-cluster
+                    kind load docker-image ${FRONTEND_IMAGE}:${IMAGE_TAG} --name aquila-cluster
                 """
             }
         }
@@ -61,7 +61,7 @@ pipeline {
             steps {
                 sh """
                     kubectl config use-context ${KIND_CONTEXT}
-                    kubectl apply -f backend/
+                    kubectl apply -f k8-manifest/backend.yaml -f k8-manifest/backend-svc.yaml
                     kubectl set image deployment/backend backend=${BACKEND_IMAGE}:${IMAGE_TAG} --record || true
                     kubectl rollout status deployment/backend --timeout=120s
                 """
@@ -72,7 +72,7 @@ pipeline {
             steps {
                 sh """
                     kubectl config use-context ${KIND_CONTEXT}
-                    kubectl apply -f frontend/
+                    kubectl apply -f k8-manifest/frontend.yaml -f k8-manifest/frontend-svc.yaml
                     kubectl set image deployment/frontend frontend=${FRONTEND_IMAGE}:${IMAGE_TAG} --record || true
                     kubectl rollout status deployment/frontend --timeout=120s
                 """
@@ -82,7 +82,7 @@ pipeline {
 
     post {
         success {
-            echo "Backend and frontend deployed to kind cluster 'aquila'."
+            echo "Backend and frontend deployed to kind cluster 'aquila-cluster'."
         }
         failure {
             echo "Pipeline failed — check stage logs above."
